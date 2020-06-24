@@ -1,5 +1,6 @@
 export const AppURl = {
-    AppRoot: '',
+    App: '',
+    AppRoot: '/',
     AppWidgetA: 'widget-a',
 
 

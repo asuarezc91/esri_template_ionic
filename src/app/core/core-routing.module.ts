@@ -1,16 +1,27 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 import { AppURl } from '../config/app-urls.config';
  
 
 
 const routes: Routes = [  
-  { path: AppURl.AppRoot, redirectTo: AppURl.AppWidgetA, pathMatch: 'full' },
-  { path: AppURl.AppWidgetA, loadChildren: () => import('../views/widgets/widgets.module').then(m => m.WidgetsModule) },
+  { path: AppURl.App, redirectTo: AppURl.AppWidgetA, pathMatch: 'full' },
+  { path: AppURl.AppWidgetA, loadChildren: () => import('../views/widget-a-page/widget-a.module').then(m => m.WidgetAModule) },
 ]
 
+//Importante cambiar las líneas para pre-cargar la página del widget A
+
+
+// @NgModule({
+//   imports: [RouterModule.forChild(routes)],
+//   exports: [RouterModule]
+// })
+// export class CoreRoutingModule { }
+
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+  ],
   exports: [RouterModule]
 })
 export class CoreRoutingModule { }
