@@ -1,13 +1,12 @@
 .esri-view {
- 
+  position: relative;
+  z-index: 99999;
   height: 100%;
   width: 75%;
   outline: none;
 }
 
 .Main {
-  position: absolute;
-  z-index: 99999999999;
   height: 100%;
   width: 100%;
   display: flex;
@@ -15,7 +14,9 @@
 }
 
 .two {
+  position: relative;
+  z-index: 99999;
   height: 100%;
   width: 5%;
-  background-color: red;
+  background-color: #282C39;
 }

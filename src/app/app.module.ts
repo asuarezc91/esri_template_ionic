@@ -9,6 +9,9 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
+import { DataApiService } from './services/data-api.service';
+
+
 
 //Muy importante traerte el core module aquí 
 @NgModule({
@@ -16,9 +19,10 @@ import { CoreModule } from './core/core.module';
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(),CoreModule],
   providers: [
+    DataApiService,
     StatusBar,
     SplashScreen,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],
   bootstrap: [AppComponent]
 })

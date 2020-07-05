@@ -3,26 +3,21 @@ import { CommonModule } from '@angular/common';
 
 import { CoreRoutingModule } from './core-routing.module';
 import { MapComponent } from './components/map/map.component';
-import { HeaderComponent } from './components/header/header.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { MenuComponent } from './components/menu/menu.component';
+import { DataApiService } from '../services/data-api.service';
 
 
 //Hay que tener en cuenta el declatarion y el exports
 
 @NgModule({
-  declarations: [MapComponent,HeaderComponent,SidebarComponent,MenuComponent],
+  declarations: [MapComponent],
   imports: [
     CommonModule,
     CoreRoutingModule,
   ],
   exports: [
     MapComponent,
-    HeaderComponent,
-    SidebarComponent,
-    MenuComponent
   ],
-
+  // providers: [DataApiService]
 })
 export class CoreModule { }
 
