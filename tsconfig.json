@@ -7,6 +7,8 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
+    //clave para EL PLUGIN DE ESRI
+    "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,

@@ -5,7 +5,14 @@ import { maximumNumberOfFeatures } from 'esri/views/3d/support/LayerPerformanceI
 import { TestBed } from '@angular/core/testing';
 import { escapeRegExp } from '@angular/compiler/src/util';
 import { hasUncaughtExceptionCaptureCallback } from 'process';
-import { request } from 'http';
+//ESRI
+// mapView es la view en este caso!! 
+import Map from "esri/Map"
+import request from "esri/request"
+import esriConfig from "esri/config"
+import Field from  "esri/layers/support/Field"
+
+
 
 @Component({
   selector: 'app-map',
@@ -51,6 +58,8 @@ export class MapComponent {
         };
         // create map view by default properties
         this.mapView = new MapView(mapViewProperties);
+
+  
 
         // Set service properties
         // url - this address to MapServer from ArcGIS Enterprise
