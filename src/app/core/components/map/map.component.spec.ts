@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { MapComponent } from './map.component';
 
-describe('MapComponent', () => {
+describe('EsriMapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
+  let app: any; // debugElement.componentInstance
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MapComponent ],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents();
-
+      declarations: [MapComponent]
+    })
+      .compileComponents();
     fixture = TestBed.createComponent(MapComponent);
+    app = fixture.debugElement.componentInstance;
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
@@ -21,4 +21,12 @@ describe('MapComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('verify default values', () => {
+    expect(app.basemap).toEqual(jasmine.any(String));
+    expect(app.center).toEqual(jasmine.any(Array));
+    expect(app.zoom).toEqual(jasmine.any(Number));
+    expect(app.mapLoaded).toEqual(false);
+  });
+
 });
