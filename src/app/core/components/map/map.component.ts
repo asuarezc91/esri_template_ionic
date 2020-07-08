@@ -31,17 +31,15 @@ import Field from  "esri/layers/support/Field"
 export class MapComponent implements OnInit, OnDestroy {
 
   @Output() mapLoadedEvent = new EventEmitter<boolean>();
-
-  // The <div> where we will place the map
   @ViewChild("mapViewNode", { static: true }) private mapViewEl: ElementRef;
 
   private _zoom = 11;
   private _center: Array<number> = [-17.916829, 28.658880];
-  // private _center: Array<number> = [-4, 40];
-  private _basemap = "gray";
+  private _basemap = "dark-gray";
   private _loaded = false;
   private _view: esri.MapView = null;
   private _featureL: esri.FeatureLayer = null;
+  private _req : any; 
 
 
   get mapLoaded(): boolean {
@@ -75,7 +73,7 @@ export class MapComponent implements OnInit, OnDestroy {
     return this._basemap;
   }
 
-  constructor() {
+  constructor( private dataApi: DataApiService ) {
 
 
 
@@ -98,53 +96,16 @@ export class MapComponent implements OnInit, OnDestroy {
       ]);
       const url: string = "https://services6.arcgis.com/30currU8oaQeVHvW/arcgis/rest/services/L%C3%ADneas_de_guagua/FeatureServer/0";
       this._featureL = new FeatureLayer(url);
-
-// DEFINITIVO FUNCIONA DE LUJO 
-        
-      // var params = {
-      //   name: name,
-      //   targetSR: this._view.spatialReference,
-      //   maxRecordCount: 1000,
-      //   enforceInputFileSizeLimit: true,
-      //   enforceOutputJsonSizeLimit: true
-      // };
-
-
-      //    var myContent = {
-      //       filetype: "shapefile",
-      //       publishParameters: JSON.stringify(params),
-      //       f: "json"
-      //     };
-  
-      //     let portalUrl = "https://www.arcgis.com";
-  
-      //     let options = {
-      //       query: myContent,
-      //       body: document.getElementById("uploadForm"),
-      //       responseType: "json"
-      //     }
-  
-      //     // use the REST generate operation to generate a feature collection from the zipped shapefile
-      //     request(portalUrl + "/sharing/rest/content/features/generate", options)
-      //       .then(function (response :any ) {
-      //         var layerName =
-      //           response.data.featureCollection.layers[0].layerDefinition.name;
-      //         document.getElementById("upload-status").innerHTML =
-      //           "<b>Loaded: </b>" + layerName;
-      //         // addShapefileToMap(response.data.featureCollection);
-      //       })
-      //       // .catch(errorHandler);
-  
-
-
-      console.log(this._featureL);
+      // console.log(this._featureL);
 
       const mapProperties: esri.MapProperties = {
         basemap: this._basemap,
       };
 
+
+
       const map: esri.Map = new EsriMap(mapProperties);
-      map.layers.add(this._featureL);
+      // map.layers.add(this._featureL);
       const mapViewProperties: esri.MapViewProperties = {
         container: this.mapViewEl.nativeElement,
         center: this._center,
@@ -157,26 +118,119 @@ export class MapComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.log("EsriLoader: ", error);
     }
+ 
+
   }
 
-  filterMap(event: any) {
-    const selectedLine = event.value.id;
-    console.log(selectedLine); 
-    this._featureL.definitionExpression = "Linea = '" + selectedLine + "'";
-    // this._featureL.definitionExpression = "1=1";
-  }
+ 
 
 
   ngOnInit() {
-
-
-
     this.initializeMap().then(mapView => {
       console.log("mapView ready: ", this._view.ready);
       this._loaded = this._view.ready;
       this.mapLoadedEvent.emit(true);
     });
+
+    this.dataApi.reservation$.subscribe(fileName => {
+      console.log(fileName);
+      // console.log(this._view); 
+      const test = this._view; 
+      // console.log(this._view.spatialReference);
+       this.newLayer(fileName , test);
+    })
+
+  
   }
+
+
+  async newLayer(fileName,test) {
+    try {
+      const [EsriMap, EsriMapView, FeatureLayer, Point, SimpleMarkerSymbol, Polyline, SimpleRenderer, Renderer,request] = await loadModules([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/geometry/Point",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/geometry/Polyline",
+        "esri/renderers/SimpleRenderer",
+        "esri/renderers/Renderer",
+        "esri/request"
+
+      ]);
+     
+ 
+         
+        const fileName2 = fileName[0]; 
+        console.log(fileName2);
+        var name = fileName2.split(".");
+        // Chrome and IE add c:\fakepath to the value - we need to remove it
+        // see this link for more info: http://davidwalsh.name/fakepath
+        name = name[0].replace("c:\\fakepath\\", "");
+  
+        // document.getElementById("upload-status").innerHTML =
+        //   "<b>Loading </b>" + name;
+  
+        // define the input params for generate see the rest doc for details
+        // https://developers.arcgis.com/rest/users-groups-and-items/generate.htm
+        var params = {
+          name: name,
+          targetSR: test.spatialReference,
+          maxRecordCount: 1000,
+          enforceInputFileSizeLimit: true,
+          enforceOutputJsonSizeLimit: true
+        };
+  
+        // generalize features to 10 meters for better performance
+        // params.generalize = true;
+        // params.maxAllowableOffset = 10;
+        // params.reducePrecision = true;
+        // params.numberOfDigitsAfterDecimal = 0;
+  
+        var myContent = {
+          filetype: "shapefile",
+          publishParameters: JSON.stringify(params),
+          f: "json"
+        };
+  
+        var portalUrl = "https://www.arcgis.com";
+
+        debugger; 
+          const ese = document.getElementById("uploadForm"); 
+          console.log(ese); 
+        // use the REST generate operation to generate a feature collection from the zipped shapefile
+        request(portalUrl + "/sharing/rest/content/features/generate", {
+          query: myContent,
+          body: document.getElementById("uploadForm"),
+          responseType: "json"
+        })
+          .then(function(response) {
+            var layerName =
+              response.data.featureCollection.layers[0].layerDefinition.name;
+
+              console.log(layerName); 
+            // document.getElementById("upload-status").innerHTML =
+            //   "<b>Loaded: </b>" + layerName;
+            // addShapefileToMap(response.data.featureCollection);
+          })
+          .catch(errorHandler);
+    
+       
+          function errorHandler(error) {
+            console.log(error.message);
+            // document.getElementById("upload-status").innerHTML =
+            //   "<p style='color:red;max-width: 500px;'>" + error.message + "</p>";
+          }
+  
+
+   
+    } catch (error) {
+      console.log("EsriLoader: ", error);
+    }
+ 
+
+  }
+
 
   ngOnDestroy() {
     if (this._view) {
@@ -185,5 +239,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   
+
+
 }
 

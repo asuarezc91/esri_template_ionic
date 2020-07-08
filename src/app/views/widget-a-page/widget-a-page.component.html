@@ -1,4 +1,12 @@
 <div id="widgetA">
     <label for="myfile">Select a file:</label>
-    <input type="file" id="myfile" (change)="saverange($event)" name="myfile">
+    <!-- <input type="file" id="uploadForm" (change)="saverange($event)" name="myfile"> -->
+    <form enctype="multipart/form-data" method="post" id="uploadForm">
+        <div class="field">
+          <label class="file-upload">
+            <span><strong>Add File</strong></span>
+            <input (change)="saverange($event)" type="file" name="file" id="inFile" />
+          </label>
+        </div>
+      </form>
 </div>
