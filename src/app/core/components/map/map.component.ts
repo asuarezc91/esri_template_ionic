@@ -30,8 +30,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private _basemap = "dark-gray";
   private _loaded = false;
   private _view: esri.MapView = null;
-  private _featureL: esri.FeatureLayer = null;
-  private _req: any;
+  // private _featureL: esri.FeatureLayer = null;
+  // private _req: any;
   private _map: esri.Map = null;
 
 
@@ -83,9 +83,11 @@ export class MapComponent implements OnInit, OnDestroy {
         "esri/renderers/Renderer",
         "esri/request"
       ]);
-      const url: string = "https://services6.arcgis.com/30currU8oaQeVHvW/arcgis/rest/services/L%C3%ADneas_de_guagua/FeatureServer/0";
-      this._featureL = new FeatureLayer(url);
-      // console.log(this._featureL);
+
+
+      // const url: string = "https://services6.arcgis.com/30currU8oaQeVHvW/arcgis/rest/services/L%C3%ADneas_de_guagua/FeatureServer/0";
+      // this._featureL = new FeatureLayer(url);
+
 
       const mapProperties: esri.MapProperties = {
         basemap: this._basemap,
@@ -115,14 +117,14 @@ export class MapComponent implements OnInit, OnDestroy {
     });
     this.dataApi.reservation$.subscribe(fileName => {
       console.log(fileName);
-      const test = this._view;
-      const testMap = this._map;
-      this.newLayer(fileName, test, testMap);
+      const mainView = this._view;
+      const mainMap = this._map;
+      this.newLayer(fileName, mainView, mainMap);
     })
   }
 
 
-  async newLayer(fileName, test, testMap) {
+  async newLayer(fileName, mainView, mainMap) {
     try {
       const [EsriMap, EsriMapView, FeatureLayer, Point, SimpleMarkerSymbol, Polyline, SimpleRenderer, Renderer, request, Graphic, Field] = await loadModules([
         "esri/Map",
@@ -140,27 +142,16 @@ export class MapComponent implements OnInit, OnDestroy {
       const fileName2 = fileName[0];
       console.log(fileName2);
       var name = fileName2.split(".");
-      // Chrome and IE add c:\fakepath to the value - we need to remove it
-      // see this link for more info: http://davidwalsh.name/fakepath
       name = name[0].replace("c:\\fakepath\\", "");
-      // document.getElementById("upload-status").innerHTML =
-      //   "<b>Loading </b>" + name;
-
       // define the input params for generate see the rest doc for details
       // https://developers.arcgis.com/rest/users-groups-and-items/generate.htm
       var params = {
         name: name,
-        targetSR: test.spatialReference,
+        targetSR: mainView.spatialReference,
         maxRecordCount: 1000,
         enforceInputFileSizeLimit: true,
         enforceOutputJsonSizeLimit: true
       };
-
-      // generalize features to 10 meters for better performance
-      // params.generalize = true;
-      // params.maxAllowableOffset = 10;
-      // params.reducePrecision = true;
-      // params.numberOfDigitsAfterDecimal = 0;
 
       var myContent = {
         filetype: "shapefile",
@@ -169,8 +160,7 @@ export class MapComponent implements OnInit, OnDestroy {
       };
       var portalUrl = "https://www.arcgis.com";
 
-      const ese = document.getElementById("uploadForm");
-      console.log(ese);
+
       // use the REST generate operation to generate a feature collection from the zipped shapefile
       request(portalUrl + "/sharing/rest/content/features/generate", {
         query: myContent,
@@ -178,17 +168,15 @@ export class MapComponent implements OnInit, OnDestroy {
         responseType: "json"
       })
         .then(function (response) {
-          var layerName =
-          response.data.featureCollection.layers[0].layerDefinition.name;
-          console.log(layerName);
-          // document.getElementById("upload-status").innerHTML =
-          //   "<b>Loaded: </b>" + layerName;
-          // addShapefileToMap(response.data.featureCollection);
+          // var layerName =
+          //   response.data.featureCollection.layers[0].layerDefinition.name;
+          // console.log(layerName);
 
-          // addShapefileToMap.call(response.data.featureCollection)
 
           var sourceGraphics = [];
           var layers = response.data.featureCollection.layers.map(function (layer) {
+            //Check if the layer is a point layer
+            console.log(layer.featureSet.geometryType); 
             var graphics = layer.featureSet.features.map(function (feature) {
               return Graphic.fromJSON(feature);
             });
@@ -200,17 +188,24 @@ export class MapComponent implements OnInit, OnDestroy {
                 return Field.fromJSON(field);
               })
             });
+
+
+            const source = featureLayer.source.sourceJSON;
+            // const test =  source["sourceJSON"]; 
+            console.log(sourceGraphics);
+
+            
+
             return featureLayer;
             // associate the feature with the popup on click to enable highlight and zoom to
           });
 
-          testMap.addMany(layers);
-          test.goTo(sourceGraphics).catch(function (error) {
+          mainMap.addMany(layers);
+          mainView.goTo(sourceGraphics).catch(function (error) {
             if (error.name != "AbortError") {
               console.error(error);
             }
           });
-          // document.getElementById("upload-status").innerHTML = "";
         })
         .catch(errorHandler);
 
