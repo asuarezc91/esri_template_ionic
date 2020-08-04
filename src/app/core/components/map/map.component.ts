@@ -172,53 +172,64 @@ export class MapComponent implements OnInit, OnDestroy {
           //   response.data.featureCollection.layers[0].layerDefinition.name;
           // console.log(layerName);
 
-
           var sourceGraphics = [];
           var layers = response.data.featureCollection.layers.map(function (layer) {
             //Check if the layer is a point layer
-            console.log(layer.featureSet.geometryType); 
-            var graphics = layer.featureSet.features.map(function (feature) {
-              return Graphic.fromJSON(feature);
-            });
-            sourceGraphics = sourceGraphics.concat(graphics);
-            var featureLayer = new FeatureLayer({
-              objectIdField: "FID",
-              source: graphics,
-              fields: layer.layerDefinition.fields.map(function (field) {
-                return Field.fromJSON(field);
-              })
-            });
+            console.log(layer.featureSet.geometryType);
+            if (layer.featureSet.geometryType === "esriGeometryPoint") {
+              var graphics = layer.featureSet.features.map(function (feature) {
+                return Graphic.fromJSON(feature);
+              });
+              sourceGraphics = sourceGraphics.concat(graphics);
+              var featureLayer = new FeatureLayer({
+                objectIdField: "FID",
+                source: graphics,
+                fields: layer.layerDefinition.fields.map(function (field) {
+                  return Field.fromJSON(field);
+                })
+              });
 
 
-            const source = featureLayer.source.sourceJSON;
-            // const test =  source["sourceJSON"]; 
-            console.log(sourceGraphics);
+              const source = featureLayer.source.sourceJSON;
+              // const test =  source["sourceJSON"]; 
+              console.log(sourceGraphics);
 
-            
 
-            return featureLayer;
+
+              return featureLayer;
+            } else {
+              alert("This layer isn't a Point layer")
+            }
             // associate the feature with the popup on click to enable highlight and zoom to
           });
 
-          mainMap.addMany(layers);
-          mainView.goTo(sourceGraphics).catch(function (error) {
-            if (error.name != "AbortError") {
-              console.error(error);
-            }
-          });
+
+          //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
+          console.log(mainMap.layers.items);
+          // if (mainMap.layers.items) {
+      
+            mainMap.addMany(layers);
+            mainView.goTo(sourceGraphics).catch(function (error) {
+              if (error.name != "AbortError") {
+                console.error(error);
+              }
+            });
+          // }
+      
         })
         .catch(errorHandler);
-
-
       function errorHandler(error) {
         console.log(error.message);
-        // document.getElementById("upload-status").innerHTML =
-        //   "<p style='color:red;max-width: 500px;'>" + error.message + "</p>";
       }
+
     } catch (error) {
       console.log("EsriLoader: ", error);
     }
+
+
+
   }
+
   ngOnDestroy() {
     if (this._view) {
       this._view.container = null;
