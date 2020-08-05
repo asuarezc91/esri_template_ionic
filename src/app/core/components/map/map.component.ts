@@ -123,7 +123,6 @@ export class MapComponent implements OnInit, OnDestroy {
     })
   }
 
-
   async newLayer(fileName, mainView, mainMap) {
     try {
       const [EsriMap, EsriMapView, FeatureLayer, Point, SimpleMarkerSymbol, Polyline, SimpleRenderer, Renderer, request, Graphic, Field] = await loadModules([
@@ -159,8 +158,6 @@ export class MapComponent implements OnInit, OnDestroy {
         f: "json"
       };
       var portalUrl = "https://www.arcgis.com";
-
-
       // use the REST generate operation to generate a feature collection from the zipped shapefile
       request(portalUrl + "/sharing/rest/content/features/generate", {
         query: myContent,
@@ -171,15 +168,18 @@ export class MapComponent implements OnInit, OnDestroy {
           // var layerName =
           //   response.data.featureCollection.layers[0].layerDefinition.name;
           // console.log(layerName);
-
           var sourceGraphics = [];
           var layers = response.data.featureCollection.layers.map(function (layer) {
             //Check if the layer is a point layer
             console.log(layer.featureSet.geometryType);
             if (layer.featureSet.geometryType === "esriGeometryPoint") {
               var graphics = layer.featureSet.features.map(function (feature) {
+                // console.log(feature);
                 return Graphic.fromJSON(feature);
               });
+
+              console.log(graphics);
+
               sourceGraphics = sourceGraphics.concat(graphics);
               var featureLayer = new FeatureLayer({
                 objectIdField: "FID",
@@ -188,46 +188,58 @@ export class MapComponent implements OnInit, OnDestroy {
                   return Field.fromJSON(field);
                 })
               });
-
-
+              // console.log(featureLayer);
               const source = featureLayer.source.sourceJSON;
-              // const test =  source["sourceJSON"]; 
-              console.log(sourceGraphics);
-
-
-
+              // console.log(sourceGraphics);
               return featureLayer;
             } else {
               alert("This layer isn't a Point layer")
             }
             // associate the feature with the popup on click to enable highlight and zoom to
           });
-
-
           //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
-          console.log(mainMap.layers.items);
-          // if (mainMap.layers.items) {
-      
+          const numberLayers = mainMap.layers.items;
+          // console.log(numberLayers.length);
+          // console.log(mainMap.layers.items);
+          if (numberLayers.length <= 1) {
+            debugger;
+            console.log(numberLayers.shift());
+            const tested = numberLayers.shift();
+            if ( tested != undefined) {
+              alert("draw!");
+              let layerTwo = layers[1];
+              // layerTwo.renderer = {
+              //   type: "simple", 
+              //   symbol: {
+              //     type: "simple-marker", 
+              //     size: 6,
+              //     color: "black",
+              //     outline: { 
+              //       width: 0.5,
+              //       color: "white"
+              //     }
+              //   }
+              // };
+            }
+            // console.log(layers);
             mainMap.addMany(layers);
             mainView.goTo(sourceGraphics).catch(function (error) {
               if (error.name != "AbortError") {
                 console.error(error);
               }
             });
-          // }
-      
+          }
+          else {
+            alert("A lot of layers");
+          }
         })
         .catch(errorHandler);
       function errorHandler(error) {
         console.log(error.message);
       }
-
     } catch (error) {
       console.log("EsriLoader: ", error);
     }
-
-
-
   }
 
   ngOnDestroy() {
