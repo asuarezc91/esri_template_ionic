@@ -116,7 +116,7 @@ export class MapComponent implements OnInit, OnDestroy {
       this.mapLoadedEvent.emit(true);
     });
     this.dataApi.reservation$.subscribe(fileName => {
-      console.log(fileName);
+      // console.log(fileName);
       const mainView = this._view;
       const mainMap = this._map;
       this.newLayer(fileName, mainView, mainMap);
@@ -139,7 +139,7 @@ export class MapComponent implements OnInit, OnDestroy {
         "esri/layers/support/Field",
       ]);
       const fileName2 = fileName[0];
-      console.log(fileName2);
+      // console.log(fileName2);
       var name = fileName2.split(".");
       name = name[0].replace("c:\\fakepath\\", "");
       // define the input params for generate see the rest doc for details
@@ -164,14 +164,15 @@ export class MapComponent implements OnInit, OnDestroy {
         body: document.getElementById("uploadForm"),
         responseType: "json"
       })
-        .then(function (response) {
+        .then(async function (response) {
           // var layerName =
           //   response.data.featureCollection.layers[0].layerDefinition.name;
           // console.log(layerName);
+          alert("loaded");
           var sourceGraphics = [];
-          var layers = response.data.featureCollection.layers.map(function (layer) {
+          var layers = await response.data.featureCollection.layers.map(function (layer) {
             //Check if the layer is a point layer
-            console.log(layer.featureSet.geometryType);
+            // console.log(layer.featureSet.geometryType);
             if (layer.featureSet.geometryType === "esriGeometryPoint") {
               var graphics = layer.featureSet.features.map(function (feature) {
                 // console.log(feature);
@@ -198,40 +199,51 @@ export class MapComponent implements OnInit, OnDestroy {
             // associate the feature with the popup on click to enable highlight and zoom to
           });
           //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
-          const numberLayers = mainMap.layers.items;
-          // console.log(numberLayers.length);
+          const numberLayers = await mainMap.layers.items;
+          console.log(numberLayers);
+
           // console.log(mainMap.layers.items);
           if (numberLayers.length <= 1) {
-            debugger;
-            console.log(numberLayers.shift());
-            const tested = numberLayers.shift();
-            if ( tested != undefined) {
-              alert("draw!");
-              let layerTwo = layers[1];
-              // layerTwo.renderer = {
-              //   type: "simple", 
-              //   symbol: {
-              //     type: "simple-marker", 
-              //     size: 6,
-              //     color: "black",
-              //     outline: { 
-              //       width: 0.5,
-              //       color: "white"
-              //     }
-              //   }
-              // };
+            alert("good")
+
+            //Aquí hay una asincronía bestial, recuperamos la primera capa con un [0] , pero necesitamos acceder a la segunda
+            console.log(numberLayers[0])
+            
+          } else { alert("bad, a lot of layers") };
+
+          // if (numberLayers.length <= 1) {
+          //   debugger;
+          //   console.log(numberLayers.shift());
+          //   const tested = numberLayers.shift();
+          //   if ( tested != undefined) {
+          //     alert("draw!");
+          //     let layerTwo = layers[1];
+          //     layerTwo.renderer = {
+          //       type: "simple", 
+          //       symbol: {
+          //         type: "simple-marker", 
+          //         size: 6,
+          //         color: "black",
+          //         outline: { 
+          //           width: 0.5,
+          //           color: "white"
+          //         }
+          //       }
+          //     };
+          //   }
+
+
+          // console.log(layers);
+          mainMap.addMany(layers);
+          mainView.goTo(sourceGraphics).catch(function (error) {
+            if (error.name != "AbortError") {
+              console.error(error);
             }
-            // console.log(layers);
-            mainMap.addMany(layers);
-            mainView.goTo(sourceGraphics).catch(function (error) {
-              if (error.name != "AbortError") {
-                console.error(error);
-              }
-            });
-          }
-          else {
-            alert("A lot of layers");
-          }
+          });
+          // }
+          // else {
+          //   alert("A lot of layers");
+          // }
         })
         .catch(errorHandler);
       function errorHandler(error) {
