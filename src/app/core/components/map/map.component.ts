@@ -35,6 +35,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private _map: esri.Map = null;
 
 
+
   get mapLoaded(): boolean {
     return this._loaded;
   }
@@ -115,8 +116,9 @@ export class MapComponent implements OnInit, OnDestroy {
       this._loaded = this._view.ready;
       this.mapLoadedEvent.emit(true);
     });
+
+
     this.dataApi.reservation$.subscribe(fileName => {
-      // console.log(fileName);
       const mainView = this._view;
       const mainMap = this._map;
       this.newLayer(fileName, mainView, mainMap);
@@ -139,12 +141,9 @@ export class MapComponent implements OnInit, OnDestroy {
         "esri/layers/support/Field",
       ]);
       const fileName2 = fileName[0];
-      // console.log(fileName2);
-      var name = fileName2.split(".");
+      let name = fileName2.split(".");
       name = name[0].replace("c:\\fakepath\\", "");
-      // define the input params for generate see the rest doc for details
-      // https://developers.arcgis.com/rest/users-groups-and-items/generate.htm
-      var params = {
+      let params = {
         name: name,
         targetSR: mainView.spatialReference,
         maxRecordCount: 1000,
@@ -152,12 +151,12 @@ export class MapComponent implements OnInit, OnDestroy {
         enforceOutputJsonSizeLimit: true
       };
 
-      var myContent = {
+      let myContent = {
         filetype: "shapefile",
         publishParameters: JSON.stringify(params),
         f: "json"
       };
-      var portalUrl = "https://www.arcgis.com";
+      let portalUrl = "https://www.arcgis.com";
       // use the REST generate operation to generate a feature collection from the zipped shapefile
       request(portalUrl + "/sharing/rest/content/features/generate", {
         query: myContent,
@@ -169,18 +168,14 @@ export class MapComponent implements OnInit, OnDestroy {
           //   response.data.featureCollection.layers[0].layerDefinition.name;
           // console.log(layerName);
           alert("loaded");
-          var sourceGraphics = [];
-          var layers = await response.data.featureCollection.layers.map(function (layer) {
+
+          let sourceGraphics = [];
+          let layers = await response.data.featureCollection.layers.map(function (layer) {
             //Check if the layer is a point layer
-            // console.log(layer.featureSet.geometryType);
             if (layer.featureSet.geometryType === "esriGeometryPoint") {
-              var graphics = layer.featureSet.features.map(function (feature) {
-                // console.log(feature);
+              let graphics = layer.featureSet.features.map(function (feature) {
                 return Graphic.fromJSON(feature);
               });
-
-              console.log(graphics);
-
               sourceGraphics = sourceGraphics.concat(graphics);
               var featureLayer = new FeatureLayer({
                 objectIdField: "FID",
@@ -200,15 +195,15 @@ export class MapComponent implements OnInit, OnDestroy {
           });
           //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
           const numberLayers = await mainMap.layers.items;
-          console.log(numberLayers);
+          // console.log(numberLayers);
 
           // console.log(mainMap.layers.items);
           if (numberLayers.length <= 1) {
             alert("good")
 
             //Aquí hay una asincronía bestial, recuperamos la primera capa con un [0] , pero necesitamos acceder a la segunda
-            console.log(numberLayers[0])
-            
+            // console.log(numberLayers[0])
+
           } else { alert("bad, a lot of layers") };
 
           // if (numberLayers.length <= 1) {
@@ -233,17 +228,42 @@ export class MapComponent implements OnInit, OnDestroy {
           //   }
 
 
-          // console.log(layers);
+          if (numberLayers.length === 1) {
+            alert("the second color");
+            layers[0].renderer = {
+              type: 'simple',
+              label: "",
+              description: "",
+              symbol: {
+                type: "picture-marker",
+                url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC5.png',
+                width: '24px',
+                height: '24px'
+              }
+            }
+          } else {
+            layers[0].renderer = {
+              type: 'simple',
+              label: "",
+              description: "",
+              symbol: {
+                type: "picture-marker",
+                url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC1.png',
+                width: '24px',
+                height: '24px'
+              }
+            }
+          }
+
+
+          console.log(layers);
+
           mainMap.addMany(layers);
           mainView.goTo(sourceGraphics).catch(function (error) {
             if (error.name != "AbortError") {
               console.error(error);
             }
           });
-          // }
-          // else {
-          //   alert("A lot of layers");
-          // }
         })
         .catch(errorHandler);
       function errorHandler(error) {
