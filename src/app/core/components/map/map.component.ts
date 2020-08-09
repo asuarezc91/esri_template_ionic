@@ -123,6 +123,12 @@ export class MapComponent implements OnInit, OnDestroy {
       const mainMap = this._map;
       this.newLayer(fileName, mainView, mainMap);
     })
+
+
+    this.dataApi.buttonToMap$.subscribe(man => {
+    console.log(man); 
+    })
+
   }
 
   async newLayer(fileName, mainView, mainMap) {
@@ -273,6 +279,9 @@ export class MapComponent implements OnInit, OnDestroy {
       console.log("EsriLoader: ", error);
     }
   }
+
+
+ 
 
   ngOnDestroy() {
     if (this._view) {

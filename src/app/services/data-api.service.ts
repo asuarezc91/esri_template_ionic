@@ -16,6 +16,7 @@ export class DataApiService {
   //Observable 
   reservation$ = new EventEmitter <object>(); 
   
+  buttonToMap$ = new EventEmitter <boolean> (); 
 
 
   constructor() { }
