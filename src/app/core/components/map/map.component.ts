@@ -27,13 +27,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
   private _zoom = 11;
   private _center: Array<number> = [-17.916829, 28.658880];
+
   private _basemap = "dark-gray";
+  private _baseman = "dark-man";
+
   private _loaded = false;
   private _view: esri.MapView = null;
   // private _featureL: esri.FeatureLayer = null;
   // private _req: any;
   private _map: esri.Map = null;
-
 
 
   get mapLoaded(): boolean {
@@ -67,9 +69,14 @@ export class MapComponent implements OnInit, OnDestroy {
     return this._basemap;
   }
 
+
+
   constructor(private dataApi: DataApiService) {
 
   }
+
+
+
 
   async initializeMap() {
     try {
@@ -126,7 +133,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
     this.dataApi.buttonToMap$.subscribe(man => {
-    console.log(man); 
+      console.log(man);
+      this.tesFunc();
     })
 
   }
@@ -264,6 +272,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
           console.log(layers);
 
+
+
           mainMap.addMany(layers);
           mainView.goTo(sourceGraphics).catch(function (error) {
             if (error.name != "AbortError") {
@@ -278,10 +288,24 @@ export class MapComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.log("EsriLoader: ", error);
     }
+
+    //works very well !! 
+    console.log(this._baseman);
+
   }
 
 
- 
+  async tesFunc() {
+    alert("man");
+
+    console.log(this._basemap);
+    console.log(this._baseman);
+
+
+
+  }
+
+
 
   ngOnDestroy() {
     if (this._view) {
