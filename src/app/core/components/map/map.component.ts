@@ -137,7 +137,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
     this.dataApi.buttonToMap$.subscribe(man => {
-      console.log(man);
+      // console.log(man);
       this.tesFunc();
     })
 
@@ -177,98 +177,100 @@ export class MapComponent implements OnInit, OnDestroy {
       let portalUrl = "https://www.arcgis.com";
 
 
-        // use the REST generate operation to generate a feature collection from the zipped shapefile
+      // use the REST generate operation to generate a feature collection from the zipped shapefile
       request(portalUrl + "/sharing/rest/content/features/generate", {
-          query: myContent,
-          body: document.getElementById("uploadForm"),
-          responseType: "json"
-        })
-          .then(async function (response) {
-            // var layerName =
-            //   response.data.featureCollection.layers[0].layerDefinition.name;
-            // console.log(layerName);
-            alert("loaded");
-            let sourceGraphics = [];
-            let layers = await response.data.featureCollection.layers.map(function (layer) {
-              //Check if the layer is a point layer
-              if (layer.featureSet.geometryType === "esriGeometryPoint") {
-                let graphics = layer.featureSet.features.map(function (feature) {
-                  return Graphic.fromJSON(feature);
-                });
-                sourceGraphics = sourceGraphics.concat(graphics);
-                var featureLayer = new FeatureLayer({
-                  objectIdField: "FID",
-                  source: graphics,
-                  fields: layer.layerDefinition.fields.map(function (field) {
-                    return Field.fromJSON(field);
-                  })
-                });
-                // console.log(featureLayer);
-                const source = featureLayer.source.sourceJSON;
-                // console.log(sourceGraphics);
-                return featureLayer;
-              } else {
-                alert("This layer isn't a Point layer")
-              }
-              // associate the feature with the popup on click to enable highlight and zoom to
-            });
-            //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
-            const numberLayers = await mainMap.layers.items;
-            // console.log(numberLayers);
+        query: myContent,
+        body: document.getElementById("uploadForm"),
+        responseType: "json"
+      })
+        .then(async function (response) {
+          // var layerName =
+          //   response.data.featureCollection.layers[0].layerDefinition.name;
+          // console.log(layerName);
+          alert("loaded");
+          let sourceGraphics = [];
+          let layers = await response.data.featureCollection.layers.map(function (layer) {
+            //Check if the layer is a point layer
+            if (layer.featureSet.geometryType === "esriGeometryPoint") {
+              let graphics = layer.featureSet.features.map(function (feature) {
+                return Graphic.fromJSON(feature);
+              });
+              sourceGraphics = sourceGraphics.concat(graphics);
+              var featureLayer = new FeatureLayer({
+                objectIdField: "FID",
+                source: graphics,
+                fields: layer.layerDefinition.fields.map(function (field) {
+                  return Field.fromJSON(field);
+                })
+              });
 
-            // console.log(mainMap.layers.items);
-            if (numberLayers.length <= 1) {
-              alert("good")
+              // console.log(featureLayer);
 
-              //Aquí hay una asincronía bestial, recuperamos la primera capa con un [0] , pero necesitamos acceder a la segunda
-              // console.log(numberLayers[0])
-
-            } else { alert("bad, a lot of layers") };
-            if (numberLayers.length === 1) {
-              alert("the second color");
-              layers[0].renderer = {
-                type: 'simple',
-                label: "",
-                description: "",
-                symbol: {
-                  type: "picture-marker",
-                  url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC5.png', //Put a variable with c5 after the if 
-                  width: '24px',
-                  height: '24px'
-                }
-              }
+              const source = featureLayer.source.sourceJSON;
+              // console.log(sourceGraphics);
+              return featureLayer;
             } else {
-              layers[0].renderer = {
-                type: 'simple',
-                label: "",
-                description: "",
-                symbol: {
-                  type: "picture-marker",
-                  url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC1.png',
-                  width: '24px',
-                  height: '24px'
-                }
+              alert("This layer isn't a Point layer")
+            }
+            // associate the feature with the popup on click to enable highlight and zoom to
+          });
+          //Only two layers in the Map, to do this I have to create a let with a cont, if cont <= 2 , add if not, "you only can load two layers"
+          const numberLayers = await mainMap.layers.items;
+          // console.log(numberLayers);
+
+          // console.log(mainMap.layers.items);
+          if (numberLayers.length <= 1) {
+            alert("good")
+
+            //Aquí hay una asincronía bestial, recuperamos la primera capa con un [0] , pero necesitamos acceder a la segunda
+            // console.log(numberLayers[0])
+
+          } else { alert("bad, a lot of layers") };
+          if (numberLayers.length === 1) {
+            alert("the second color");
+            layers[0].renderer = {
+              type: 'simple',
+              label: "",
+              description: "",
+              symbol: {
+                type: "picture-marker",
+                url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC5.png', //Put a variable with c5 after the if 
+                width: '24px',
+                height: '24px'
               }
             }
-            // get fields to add on html selectors
-            //  console.log(layers[0].fields);
-            //  this._baseman = layers[0].fields;
-            mainMap.addMany(layers);
-
-
-            mainView.goTo(sourceGraphics).catch(function (error) {
-              if (error.name != "AbortError") {
-                console.error(error);
+          } else {
+            layers[0].renderer = {
+              type: 'simple',
+              label: "",
+              description: "",
+              symbol: {
+                type: "picture-marker",
+                url: 'https://static.arcgis.com/images/Symbols/Firefly/FireflyC1.png',
+                width: '24px',
+                height: '24px'
               }
-            });
-          })
+            }
+          }
+          // get fields to add on html selectors
+          //  console.log(layers[0].fields);
+          //  this._baseman = layers[0].fields;
+          mainMap.addMany(layers);
+
+
+          mainView.goTo(sourceGraphics).catch(function (error) {
+            if (error.name != "AbortError") {
+              console.error(error);
+            }
+          });
+        })
 
 
 
-          .catch(errorHandler);
-        function errorHandler(error) {
-          console.log(error.message);
-        }
+        .catch(errorHandler);
+      function errorHandler(error) {
+        console.log(error.message);
+      }
 
 
 
@@ -280,22 +282,70 @@ export class MapComponent implements OnInit, OnDestroy {
     //works very well !! 
     // console.log(this._baseman);
 
-    console.log(this._baseman);
+    // console.log(this._baseman);
 
 
   }
 
   async tesFunc() {
-    alert("VAMOS");
-    console.log(this._baseman);
-    console.log(this._map.layers); 
-    let layersMap = this._map.layers;
-    // Is this the feature layer to do a good query? 
-    let itemsMap = layersMap["items"];
-    console.log(itemsMap);  
+    try {
+      const [EsriMap, EsriMapView, FeatureLayer, Point, SimpleMarkerSymbol, Polyline, SimpleRenderer, Renderer, request, Graphic, Field, Query] = await loadModules([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/geometry/Point",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/geometry/Polyline",
+        "esri/renderers/SimpleRenderer",
+        "esri/renderers/Renderer",
+        "esri/request",
+        "esri/Graphic",
+        "esri/layers/support/Field",
+        "esri/tasks/support/Query"
+      ]);
 
-    
-  
+
+      let layersMap = this._map.layers;
+      let itemsMap = layersMap["items"];
+      console.log(itemsMap[0]);
+      let cont = 0;
+      let layerOne = [];
+      let layerTwo = [];
+
+
+      for (let i = 0; i < itemsMap.length; i++) {
+        const element = itemsMap[i];
+        var query = itemsMap[i].createQuery();
+        query.where = "1=1";
+        //I need here outfileds, this fields have to be equals
+        itemsMap[i].queryFeatures(query)
+          .then(async function (response) {
+            cont++;
+            if (cont === 1) {
+              layerOne = await response.features;
+            }
+            else {
+              layerTwo = await response.features;
+              calculateDistance(layerOne,layerTwo);
+            }
+          });
+
+        function calculateDistance(layerOne,layerTwo) {
+          //what is a point? 
+          //Create two points for example
+          //Calculate geometry between 2 points
+
+
+        }
+
+      }
+
+
+
+
+    } catch (error) {
+      console.log("EsriLoader: ", error);
+    }
   }
 
 
@@ -305,3 +355,9 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 }
+
+
+
+
+    // query.where = "NOMBRE = 'Biblioteca Pública Municipal de Barlovento'";
+        // query.outFields = ["NOMBRE", "MUNICIPIO"];
